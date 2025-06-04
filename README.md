@@ -1,110 +1,80 @@
-# Projekt: System wysyłki e-maili z wykorzystaniem wzorców projektowych
-
-## 🌟 Cel projektu
-
-Celem zadania jest stworzenie aplikacji do wysyłania wiadomości e-mail, wykorzystującej dwa wzorce projektowe:
-
-* **Budowniczy (Builder)** – do tworzenia złożonych obiektów e-maili,
-* **Dekorator (Decorator)** – do dynamicznego rozszerzania funkcji związanych z wysyłką wiadomości.
+# 🧪 Laboratorium: Mini IoC Container w Java&#x20;
 
 ---
 
-## 🧱 Zakres funkcjonalny
+## 🎯 Cel
 
-Twoja aplikacja powinna pozwalać na:
+Celem laboratorium jest implementacja prostego kontenera Inversion of Control (IoC), który umożliwia rejestrację komponentów oraz tworzenie ich instancji wraz ze wstrzykiwaniem zależności. Projekt ma na celu naukę:
 
-1. **Budowanie e-maili** przy pomocy klasy `EmailBuilder`, z następującymi opcjami:
-
-   * temat wiadomości (subject),
-   * treść wiadomości (body),
-   * stopka (footer),
-   * lista załączników (attachments).
-
-2. **Wysyłkę e-maili** przez interfejs `EmailSender`, implementowany przez klasę bazową i dekoratory.
+* 🧩 projektowania kodu z wykorzystaniem wzorca Dependency Injection,
+* ✅ tworzenia i czytania testów jednostkowych (TDD),
+* 🛠️ pracy z projektami Maven,
+* 🧪 pracy z testami JUnit 5.
 
 ---
 
-## 🧹 Wzorzec Budowniczego
+## 🧱 Struktura zadania (etapy pracy)
 
-Zastosuj wzorzec *Builder* do tworzenia obiektów typu `Email`. Obiekt e-maila powinien zawierać dane użytkowe:
+### 🔹 Krok 1: `ServiceA`
 
-* temat wiadomości,
-* treść wiadomości,
-* opcjonalną stopkę,
-* listę załączników.
+1. ✍️ Utwórz interfejs `Service` z metodą `String serve()`.
+2. 🔨 Zaimplementuj klasę `ServiceA`, która zwraca "ServiceA".
+3. ▶️ Uruchom test `ServiceATest`.
 
-Zbudowany obiekt powinien być niemodyfikowalny poza klasą budującą (po zbudowaniu).
+### 🔹 Krok 2: `Client`
 
----
+1. ✍️ Utwórz klasę `Client`, która przyjmuje `Service` w konstruktorze.
+2. 🔁 Zaimplementuj metodę `doWork()`, która zwraca wynik `service.serve()`.
+3. ▶️ Uruchom test `ClientTest`.
 
-## 🧹 Wzorzec Dekoratora
+### 🔹 Krok 3: `Factory` i `ServiceAFactory`
 
-Zaimplementuj system wysyłania wiadomości e-mail, w którym funkcje takie jak szyfrowanie, logowanie czy śledzenie mogą być **dynamicznie dodawane** przez dekoratory.
+1. ✍️ Utwórz interfejs `Factory` z metodą `Object create()`.
+2. 🏭 Utwórz klasę `ServiceAFactory`, która tworzy instancję `ServiceA`.
+3. ▶️ Uruchom test `ServiceAFactoryTest`.
 
-### Wymagane klasy:
+### 🔹 Krok 4: `IoCContainer` (rejestracja i rozwiązywanie)
 
-* `EmailSender` – interfejs definiujący metodę `send(...)`.
-* `BasicEmailSender` – podstawowa klasa wysyłająca wiadomość.
-* `EmailSenderDecorator` – abstrakcyjny dekorator.
+1. ✍️ Utwórz klasę `IoCContainer` z metodami:
 
----
+   * `void register(String name, Factory factory)`
+   * `Object resolve(String name)`
+2. 🧠 Zaimplementuj prostą mapę rejestracji i logikę tworzenia obiektu przez fabrykę.
+3. ▶️ Uruchom test `IoCContainerTest.shouldResolveRegisteredComponent`.
 
-## 🧹 Obowiązkowe dekoratory
+### 🔹 Krok 5: `ClientFactory`
 
-Poniżej opis funkcji każdego z wymaganych dekoratorów wraz z przykładowym komunikatem na konsoli:
+1. ✍️ Utwórz klasę `ClientFactory`, która przyjmuje `IoCContainer`.
+2. 🧩 W metodzie `create()` pobierz z kontenera komponent `"service"` i utwórz `Client`.
+3. ▶️ Uruchom test `ClientFactoryTest`.
 
-### 🔐 `EncryptionDecorator`
+### 🔹 Krok 6: Integracja kontenera
 
-Dodaje funkcję szyfrowania treści wiadomości. Treść e-maila powinna zostać zastąpiona wersją zaszyfrowaną (np. odwrócony tekst lub inne uproszczone szyfrowanie). E-mail powinien być oznaczony jako zaszyfrowany.
+1. 🔗 Zarejestruj `ServiceAFactory` i `ClientFactory` w `IoCContainer`.
+2. 🧪 Rozwiąż komponent `"client"` i sprawdź, czy zależność została poprawnie wstrzyknięta.
+3. ▶️ Uruchom test `IoCContainerTest.shouldInjectDependencyIntoClient`.
 
-**Przykładowy komunikat:**
+### 🔹 Krok 7: Obsługa błędów
 
-```
-[Encryption] Zaszyfrowano treść wiadomości.
-```
-
-### 📜 `LoggingDecorator`
-
-Odpowiada za logowanie informacji o wysyłanym e-mailu (np. temat, czas). Może wypisywać te dane na konsolę.
-
-**Przykładowy komunikat:**
-
-```
-[Logging] Wysyłka wiadomości: "Temat wiadomości".
-```
-
-### 🔍 `TrackingDecorator`
-
-Dodaje kod śledzący do treści wiadomości (np. link lub znacznik). Ten kod pozwala śledzić otwarcia lub kliknięcia. Ma być dodany na końcu treści e-maila.
-
-**Przykładowy komunikat:**
-
-```
-[Tracking] Dodano kod śledzący do wiadomości.
-```
-
-### 🌐 `PreviewDecorator`
-
-Generuje uproszczony podgląd HTML wiadomości (np. wyświetla temat jako nagłówek, a treść jako paragraf). Podgląd powinien być widoczny przed wysyłką.
-
-**Przykładowy komunikat:**
-
-```
-[Preview] Generowanie podglądu HTML...
-<h1>Temat wiadomości</h1>
-<p>Treść wiadomości</p>
-```
+1. ⚠️ W `resolve()` dodaj walidację obecności komponentu w rejestrze.
+2. 🚫 Rzuć `IllegalArgumentException`, jeśli komponent nie istnieje.
+3. ▶️ Uruchom test `IoCContainerTest.shouldThrowIfComponentNotFound`.
 
 ---
 
-## 🧰 Dodatkowe informacje
+## 🚀 Uruchamianie testów
 
-* Nie używaj gotowych bibliotek do wysyłki e-maili – wszystko ma być symulowane przez wypisywanie danych do konsoli.
-* E-mail nie musi być wysyłany przez Internet.
-* Treść projektu nie powinna zawierać kopiowanego kodu z Internetu – całość implementujesz samodzielnie.
+### 💻 Przez terminal (Maven)
 
-Powodzenia!
+```bash
+mvn test
+```
 
-![Diagram klas](diagrams/diagram.png)
+### 🧠 Przez IntelliJ IDEA
+
+Kliknij zieloną strzałkę obok metody testowej, aby uruchomić pojedynczy test.
+
+---
+
 
 
